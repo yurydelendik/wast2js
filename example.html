@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title></title>
+</head>
+<body>
+  <script src="node_modules/source-map/dist/source-map.min.js"></script>
+  <script src="src/wastparser.js"></script>
+  <script src="src/wastvm.js"></script>
+  <script src="src/wastgenjs.js"></script>
+  <script>
+    var path = 'test/i32.wast';
+    function test(s) {
+      var result = wast2jsParser.parseWAST(s);
+      var generated = wast2jsGenjs.generateJS(result,
+          {filename: path, root: new URL(".", document.location).href});
+      var output = generated.output;
+      var map = generated.map;
+
+      //window.open( URL.createObjectURL(new Blob([output], {type:'text/plain'})));
+      //window.open( URL.createObjectURL(new Blob([JSON.stringify(map)], {type:'text/plain'})));
+
+      var blob = new Blob([JSON.stringify(map)]);
+      var s = output + '//# sourceMappingURL=' + URL.createObjectURL(blob);
+      console.log(s);
+      eval(s);
+      debugger;
+    }
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', path);
+    xhr.onload = function () {
+      test(xhr.responseText);
+    };
+    xhr.send();
+  </script>
+</body>
+</html>
